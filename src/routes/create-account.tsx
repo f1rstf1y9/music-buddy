@@ -11,6 +11,8 @@ import {
   Title,
   Wrapper,
 } from "../components/auth-components";
+import GithubButton from "../components/github-btn";
+import PasswordResetButton from "../components/pwd-reset-btn";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -96,6 +98,8 @@ export default function CreateAccount() {
       <Switcher>
         Already have an account? <Link to="/login">Log in &rarr;</Link>
       </Switcher>
+      <PasswordResetButton email={email} />
+      <GithubButton />
     </Wrapper>
   );
 }
