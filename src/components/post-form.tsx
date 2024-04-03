@@ -143,6 +143,7 @@ export default function PostForm() {
       }
       setPost("");
       setFile(null);
+      setFileUploaded(false);
     } catch (e) {
       console.log(e);
     } finally {
