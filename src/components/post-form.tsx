@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
 import styled from "styled-components";
 import loadingSpinner from "../../public/loading-spinner.gif";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
+import { auth, db, storage } from "../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const Form = styled.form`
   display: flex;
@@ -46,20 +49,20 @@ const ButtonContainer = styled.div`
   justify-content: space-between;
 `;
 
-const AttachFileButton = styled.label<{ isFileUploaded: boolean }>`
+const AttachFileButton = styled.label<{ $isFileUploaded: boolean }>`
   cursor: pointer;
   &:hover {
     opacity: 0.8;
   }
   ${(props) =>
-    props.isFileUploaded ? "pointer-events: none; opacity: 0.5" : ""}
+    props.$isFileUploaded ? "pointer-events: none; opacity: 0.5" : ""}
 `;
 
 const AttachFileInput = styled.input`
   display: none;
 `;
 
-const SubmitBtn = styled.input<{ isLoading: boolean }>`
+const SubmitBtn = styled.input<{ $isLoading: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,16 +81,16 @@ const SubmitBtn = styled.input<{ isLoading: boolean }>`
   font-weight: 600;
   &:hover,
   &:active {
-    opacity: ${(props) => (props.isLoading ? "1" : "0.9")};
+    opacity: ${(props) => (props.$isLoading ? "1" : "0.9")};
   }
   ${(props) =>
-    props.isLoading
+    props.$isLoading
       ? "pointer-events: none; opacity: 0.7;"
       : "background-image: none; "}
 `;
 
 export default function PostForm() {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFileUploaded, setFileUploaded] = useState(false);
   const [post, setPost] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -105,14 +108,52 @@ export default function PostForm() {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files && files.length === 1) {
+      if (files[0].size > 1024 * 1024) {
+        alert("1MB 이하의 이미지만 업로드할 수 있습니다.");
+        return;
+      }
       setFile(files[0]);
       setFileUploaded(true);
     }
   };
 
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user || isLoading || post === "" || post.length > 180) return;
+
+    try {
+      setIsLoading(true);
+      const doc = await addDoc(collection(db, "posts"), {
+        post,
+        createAt: Date.now(),
+        username: user.displayName || "익명",
+        userId: user.uid,
+      });
+      if (file) {
+        const locationRef = ref(
+          storage,
+          `posts/${user.uid}-${user.displayName}/${doc.id}`
+        );
+        const result = await uploadBytes(locationRef, file);
+        const url = await getDownloadURL(result.ref);
+        updateDoc(doc, {
+          photo: url,
+        });
+      }
+      setPost("");
+      setFile(null);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Form>
+    <Form onSubmit={onSubmit}>
       <TextArea
+        required
         ref={textareaRef}
         onChange={onChange}
         maxLength={180}
@@ -121,7 +162,7 @@ export default function PostForm() {
       />
       <ButtonContainer>
         <div>
-          <AttachFileButton isFileUploaded={isFileUploaded} htmlFor="file">
+          <AttachFileButton $isFileUploaded={isFileUploaded} htmlFor="file">
             <svg
               width="20"
               height="20"
@@ -151,7 +192,7 @@ export default function PostForm() {
           />
         </div>
         <SubmitBtn
-          isLoading={isLoading}
+          $isLoading={isLoading}
           type="submit"
           value={isLoading ? "" : "게시하기"}
         />
