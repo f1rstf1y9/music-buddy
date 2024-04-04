@@ -105,6 +105,7 @@ export default function PostForm() {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files && files.length === 1) {
@@ -115,6 +116,7 @@ export default function PostForm() {
       setFile(files[0]);
       setFileUploaded(true);
     }
+    e.target.value = "";
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

@@ -22,7 +22,7 @@ export interface IPost {
 
 const Wrapper = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 20px;
   flex-direction: column;
   overflow-y: scroll;
   height: 100%;

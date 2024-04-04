@@ -6,7 +6,6 @@ const Wrapper = styled.div`
   display: grid;
   gap: 20px;
   overflow-y: hidden;
-  grid-template-rows: 1fr 6fr;
 `;
 
 export default function Home() {
