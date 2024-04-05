@@ -43,6 +43,33 @@ const TextArea = styled.textarea`
   }
 `;
 
+const ImgPreview = styled.div`
+  position: relative;
+  width: min-content;
+  & > button {
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    border: none;
+    border-radius: 50%;
+    background-color: #1f1f1f;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  & > img {
+    width: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+`;
+
 const ButtonContainer = styled.div`
   display: flex;
   align-items: center;
@@ -63,6 +90,7 @@ const AttachFileInput = styled.input`
 `;
 
 const SubmitBtn = styled.input<{ $isLoading: boolean }>`
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,7 +122,9 @@ export default function PostForm() {
   const [isFileUploaded, setFileUploaded] = useState(false);
   const [post, setPost] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
 
+  const imgRef = useRef<HTMLInputElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,6 +143,11 @@ export default function PostForm() {
         alert("1MB 이하의 이미지만 업로드할 수 있습니다.");
         return;
       }
+      const reader = new FileReader();
+      reader.readAsDataURL(files[0]);
+      reader.onloadend = () => {
+        setImgPreview(reader.result as string);
+      };
       setFile(files[0]);
       setFileUploaded(true);
     }
@@ -144,6 +179,7 @@ export default function PostForm() {
         });
       }
       setPost("");
+      setImgPreview(null);
       setFile(null);
       setFileUploaded(false);
     } catch (e) {
@@ -151,6 +187,12 @@ export default function PostForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onFileDelete = () => {
+    setImgPreview(null);
+    setFile(null);
+    setFileUploaded(false);
   };
 
   return (
@@ -163,6 +205,25 @@ export default function PostForm() {
         value={post}
         placeholder="어떤 노래를 듣고 있나요?"
       />
+      {imgPreview && (
+        <ImgPreview>
+          <button onClick={onFileDelete}>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.05024 13.8891C4.75734 14.182 4.75734 14.6568 5.05024 14.9497C5.34313 15.2426 5.818 15.2426 6.1109 14.9497L10 11.0606L13.8891 14.9497C14.182 15.2426 14.6569 15.2426 14.9498 14.9497C15.2427 14.6568 15.2427 14.182 14.9498 13.8891L11.0607 9.99996L14.9497 6.1109C15.2426 5.818 15.2426 5.34313 14.9497 5.05024C14.6568 4.75734 14.182 4.75734 13.8891 5.05024L10 8.9393L6.11095 5.05024C5.81805 4.75734 5.34318 4.75734 5.05029 5.05024C4.75739 5.34313 4.75739 5.818 5.05029 6.1109L8.93935 9.99996L5.05024 13.8891Z"
+                fill="#FFFFFF"
+              ></path>
+            </svg>
+          </button>
+          <img src={imgPreview} />
+        </ImgPreview>
+      )}
       <ButtonContainer>
         <div>
           <AttachFileButton $isFileUploaded={isFileUploaded} htmlFor="file">
@@ -192,6 +253,7 @@ export default function PostForm() {
             type="file"
             id="file"
             accept="image/*"
+            ref={imgRef}
           />
         </div>
         <SubmitBtn
