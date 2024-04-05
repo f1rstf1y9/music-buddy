@@ -79,6 +79,11 @@ const Payload = styled.p`
   font-size: 16px;
   white-space: pre-wrap;
   line-height: 20px;
+  & > b {
+    font-weight: 600;
+    color: #8a77ff;
+    cursor: pointer;
+  }
 `;
 
 const SettingButton = styled.div`
@@ -385,7 +390,11 @@ export default function Post({ username, photo, post, userId, id }: IPost) {
             </SettingButton>
           </Row>
           <Row>
-            <Payload>{post}</Payload>
+            <Payload
+              dangerouslySetInnerHTML={{
+                __html: post?.replace(/#(\S+)/g, "<b>#$1</b>"),
+              }}
+            />
           </Row>
           <Row>{photo ? <Photo src={photo} /> : null}</Row>{" "}
           <Row className="sub-buttons">
