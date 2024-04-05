@@ -25,6 +25,7 @@ const Wrapper = styled.div`
   gap: 20px;
   flex-direction: column;
   overflow-y: scroll;
+  width: 45vw;
   height: 100%;
 `;
 

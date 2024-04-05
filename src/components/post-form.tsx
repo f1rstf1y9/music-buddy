@@ -213,6 +213,7 @@ const MusicSearchInput = styled.input`
   align-self: center;
   width: 100%;
   padding: 10px;
+  margin-right: 10px;
   border: none;
   height: 40px;
   border-radius: 40px;
@@ -528,22 +529,19 @@ export default function PostForm() {
                 onChange={onMusicValueChange}
                 onSubmit={(e) => e.preventDefault()}
               ></MusicSearchInput>{" "}
-              <MusicList>
-                {musicResult &&
-                  musicResult.map((music) => (
-                    <MusicItem key={music._attributes.id}>
-                      <img
-                        className="music-img"
-                        src={music.album.image._cdata}
-                      />
-                      <div className="music-title">{music.title._cdata}</div>
-                      <div className="music-artist">
-                        {music.artist.name._cdata}
-                      </div>
-                    </MusicItem>
-                  ))}
-              </MusicList>
             </MusicSearchTop>
+            <MusicList>
+              {musicResult &&
+                musicResult.map((music) => (
+                  <MusicItem key={music._attributes.id}>
+                    <img className="music-img" src={music.album.image._cdata} />
+                    <div className="music-title">{music.title._cdata}</div>
+                    <div className="music-artist">
+                      {music.artist.name._cdata}
+                    </div>
+                  </MusicItem>
+                ))}
+            </MusicList>
           </MusicSearch>
         </ModalBackground>
       )}
